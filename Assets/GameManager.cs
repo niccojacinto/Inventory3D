@@ -4,19 +4,26 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-    public Inventory inventory;
-
+    public Storage storage;
     public Item selectedItem;
 
-	
-	// Update is called once per frame
-	void Update () {
-		if (Input.GetKeyDown(KeyCode.E))
+    void Update () {
+		if (Input.GetKeyDown(KeyCode.O))
         {
-            inventory.StoreItem(selectedItem);
-        } else if (Input.GetKeyDown(KeyCode.R))
+            storage.Open();
+        } else if (Input.GetKeyDown(KeyCode.X))
         {
-            inventory.RetrieveItem(selectedItem);
+            storage.Close();
+        } else if (Input.GetKeyDown(KeyCode.E))
+        {
+            storage.StoreItem(selectedItem);
+        } else if(Input.GetKeyDown(KeyCode.R))
+        {
+            storage.RetrieveItem(selectedItem);
         }
-	}
+
+
+        if (selectedItem != null)
+            storage.HighlightSlots(selectedItem);
+    }
 }

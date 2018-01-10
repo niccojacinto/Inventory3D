@@ -11,22 +11,67 @@ public class Inventory : MonoBehaviour {
     [SerializeField]
     InventorySlot[,,] inventorySlots;
 
+    Vector3 endScale;
+
     private void Start() {
+        endScale = transform.localScale;
+        transform.localScale = Vector3.zero;
+        
+
         SlotShape ss = new SlotShape(new int[,,]
         {
             { // Layer 1
-                {1,1},
-                {1,1},
-                {1,1}
+                {1,1,1},
+                {1,1,1},
             },
             { // Layer 2
-                {1,1},
-                {1,1},
-                {1,1}
+                {1,1,1},
+                {1,1,1},
             }
         });
         GenerateInventory(ss);
+        gameObject.SetActive(false);
     }
+
+    public IEnumerator Open() {
+        float elapsed = 0f;
+        float duration = 0.5f;
+        while (elapsed < duration) {
+            transform.localScale = Vector3.Lerp(Vector3.zero, endScale, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    public IEnumerator Close() {
+        float elapsed = 0f;
+        float duration = 0.5f;
+        while (elapsed < duration)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        gameObject.SetActive(false);
+    }
+
+
+    // Should be optimized, currently no idea the best way to do it.
+    public void HighlightSlotsOnHover(Item item) {
+        foreach (InventorySlot iSlot in inventorySlots)
+        {
+            iSlot.GetComponent<Renderer>().material.color = new Color(1, 1, 1, 0.3f);
+        }
+
+        foreach (IntVector3 slotPoint in item.slotPoints)
+        {
+            InventorySlot slot = GetInventorySlot(slotPoint, item);
+            if (slot != null)
+                slot.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 0.3f);
+        }
+
+    }
+
 
     public void GenerateInventory(SlotShape slotShape) {
         inventorySlots = new InventorySlot[slotShape.slotShape.GetLength(0), 
@@ -68,7 +113,6 @@ public class Inventory : MonoBehaviour {
     public void StoreItem(Item item) {
         if (CanStoreItem(item))
         {
-            item.transform.SetParent(transform);
             List<InventorySlot> slotsTaken = new List<InventorySlot>();
             foreach (IntVector3 slotPoint in item.slotPoints)
             {
@@ -76,6 +120,7 @@ public class Inventory : MonoBehaviour {
                 slot.free = false;
                 slot.gameObject.SetActive(false);
             }
+            item.transform.SetParent(transform);
         }
     }
 
